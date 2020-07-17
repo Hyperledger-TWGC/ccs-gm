@@ -1,0 +1,7 @@
+language: go
+dist: bionic
+go:
+  - 1.14.x
+  - 1.12.x
+install:
+  - go mod vendor

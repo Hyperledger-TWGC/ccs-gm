@@ -7,7 +7,7 @@
 */
 package sm4
 
-import "github.com/cetcxinlian/cryptogm/internal/subtle"
+import "github.com/Hyperledger-TWGC/cryptogm/internal/subtle"
 
 type cryptMode int
 
@@ -78,15 +78,14 @@ func keyT(in uint32) uint32 {
 	return keyL(tt(in))
 }
 
-
 func leftRotate(x uint32, r uint32) uint32 {
 	return ((x) << r) | ((x) >> (32 - r))
 }
 
-func expandKey(key []byte, enc, dec []uint32){
+func expandKey(key []byte, enc, dec []uint32) {
 	var k [36]uint32
 	for i := 0; i < 4; i++ {
-		k[i] = uint32(uint32(key[4*i])<<24 | uint32(key[4*i+1])<<16 | uint32(key[4*i+2]) << 8 | uint32(key[4*i+3])) ^ fk[i]
+		k[i] = uint32(uint32(key[4*i])<<24|uint32(key[4*i+1])<<16|uint32(key[4*i+2])<<8|uint32(key[4*i+3])) ^ fk[i]
 	}
 	for i := 0; i < 32; i++ {
 		k[i+4] = k[i] ^ keyT(k[i+1]^k[i+2]^k[i+3]^ck[i])
@@ -95,11 +94,11 @@ func expandKey(key []byte, enc, dec []uint32){
 	}
 }
 
-func encryptBlock(rk []uint32, dst,src []byte){
-	if len(dst) < BlockSize{
+func encryptBlock(rk []uint32, dst, src []byte) {
+	if len(dst) < BlockSize {
 		panic("crypto/sm4: output not full block")
 	}
-	if len(src) < BlockSize{
+	if len(src) < BlockSize {
 		panic("crypto/sm4: input not full block")
 	}
 	if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
@@ -117,9 +116,9 @@ func encryptBlock(rk []uint32, dst,src []byte){
 		x[i+4] = x[i] ^ t3(x[i+1]^x[i+2]^x[i+3]^rk[i])
 	}
 	for i := 0; i < 4; i++ {
-		dst[i*4] = byte(x[35-i]>>24)
-		dst[i*4+1] = byte(x[35-i]>>16)
-		dst[i*4+2] = byte(x[35-i]>>8)
+		dst[i*4] = byte(x[35-i] >> 24)
+		dst[i*4+1] = byte(x[35-i] >> 16)
+		dst[i*4+2] = byte(x[35-i] >> 8)
 		dst[i*4+3] = byte(x[35-i])
 	}
 }

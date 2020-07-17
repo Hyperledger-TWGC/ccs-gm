@@ -11,11 +11,11 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"errors"
-	"github.com/cetcxinlian/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/cryptogm/x509"
 	"io"
 	"math/big"
 
-	"golang_org/x/crypto/curve25519"
+	"golang.org/x/crypto/curve25519"
 )
 
 var errClientKeyExchange = errors.New("tls: invalid ClientKeyExchange message")

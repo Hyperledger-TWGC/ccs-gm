@@ -10,7 +10,7 @@ import (
 	"crypto/elliptic"
 	"encoding/asn1"
 	"errors"
-	"github.com/cetcxinlian/cryptogm/sm3"
+	"github.com/Hyperledger-TWGC/cryptogm/sm3"
 	"io"
 	"math/big"
 )
@@ -29,7 +29,7 @@ type sm2Signature struct {
 	R, S *big.Int
 }
 
-var generateRandK  = _generateRandK
+var generateRandK = _generateRandK
 
 // combinedMult implements fast multiplication S1*g + S2*p (g - generator, p - arbitrary point)
 type combinedMult interface {
@@ -120,22 +120,22 @@ func _generateRandK(rand io.Reader, c elliptic.Curve) (k *big.Int) {
 	return
 }
 
-func zeroByteSlice() []byte{
-	return []byte{0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
-		0,0,0,0,
+func zeroByteSlice() []byte {
+	return []byte{0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
 	}
 }
 
 //公钥坐标（横坐标）长度小于32字节时，在前面补0
-func getZById(pub *PublicKey, id []byte) []byte{
+func getZById(pub *PublicKey, id []byte) []byte {
 	var lena = uint16(len(id) * 8) //bit len of IDA
-	var ENTLa = []byte{byte(lena>>8), byte(lena)}
+	var ENTLa = []byte{byte(lena >> 8), byte(lena)}
 	var z = make([]byte, 0, 1024)
 
 	//判断公钥x,y坐标长度是否小于32字节，若小于则在前面补0
@@ -159,6 +159,7 @@ func getZById(pub *PublicKey, id []byte) []byte{
 	z = append(z, yBuf...)
 	return sm3.SumSM3(z)
 }
+
 //Za = sm3(ENTL||IDa||a||b||Gx||Gy||Xa||Xy)
 func getZ(pub *PublicKey) []byte {
 	return getZById(pub, []byte("1234567812345678"))
@@ -200,7 +201,7 @@ func Sign(rand io.Reader, priv *PrivateKey, msg []byte) (r, s *big.Int, err erro
 	return
 }
 
-func SignWithDigest(rand io.Reader,priv *PrivateKey, digest []byte) (r, s *big.Int, err error) {
+func SignWithDigest(rand io.Reader, priv *PrivateKey, digest []byte) (r, s *big.Int, err error) {
 	var one = new(big.Int).SetInt64(1)
 	//if len(hash) < 32 {
 	//	err = errors.New("The length of hash has short than what SM2 need.")
@@ -232,7 +233,7 @@ func SignWithDigest(rand io.Reader,priv *PrivateKey, digest []byte) (r, s *big.I
 	return
 }
 
-func VerifyById(pub *PublicKey, msg,id []byte, r, s *big.Int) bool {
+func VerifyById(pub *PublicKey, msg, id []byte, r, s *big.Int) bool {
 	c := pub.Curve
 	N := c.Params().N
 
@@ -286,8 +287,8 @@ func Verify(pub *PublicKey, msg []byte, r, s *big.Int) bool {
 	// Check if implements S1*g + S2*p
 	//Using fast multiplication CombinedMult.
 	var x1 *big.Int
-	if opt,ok := c.(combinedMult);ok {
-		x1,_ = opt.CombinedMult(pub.X, pub.Y,s.Bytes(),t.Bytes())
+	if opt, ok := c.(combinedMult); ok {
+		x1, _ = opt.CombinedMult(pub.X, pub.Y, s.Bytes(), t.Bytes())
 	} else {
 		x11, y11 := c.ScalarMult(pub.X, pub.Y, t.Bytes())
 		x12, y12 := c.ScalarBaseMult(s.Bytes())
@@ -300,7 +301,7 @@ func Verify(pub *PublicKey, msg []byte, r, s *big.Int) bool {
 	return x.Cmp(r) == 0
 }
 
-func VerifyWithDigest(pub *PublicKey, digest []byte, r, s *big.Int) bool  {
+func VerifyWithDigest(pub *PublicKey, digest []byte, r, s *big.Int) bool {
 	c := pub.Curve
 	N := c.Params().N
 

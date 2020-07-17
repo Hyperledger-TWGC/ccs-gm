@@ -11,8 +11,8 @@ import (
 	"crypto/subtle"
 	"errors"
 	"fmt"
-	"github.com/cetcxinlian/cryptogm/sm2"
-	"github.com/cetcxinlian/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/cryptogm/sm2"
+	"github.com/Hyperledger-TWGC/cryptogm/x509"
 	"io"
 	"sync/atomic"
 )
