@@ -332,22 +332,22 @@ func TestTLSUniqueMatches(t *testing.T) {
 
 func TestVerifyHostname(t *testing.T) {
 
-	c, err := Dial("tcp", "www.google.com:https", nil)
+	c, err := Dial("tcp", "www.baidu.com:https", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := c.VerifyHostname("www.google.com"); err != nil {
+	if err := c.VerifyHostname("www.baidu.com"); err != nil {
 		t.Fatalf("verify www.google.com: %v", err)
 	}
 	if err := c.VerifyHostname("www.yahoo.com"); err == nil {
 		t.Fatalf("verify www.yahoo.com succeeded")
 	}
 
-	c, err = Dial("tcp", "www.google.com:https", &Config{InsecureSkipVerify: true})
+	c, err = Dial("tcp", "www.baidu.com:https", &Config{InsecureSkipVerify: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := c.VerifyHostname("www.google.com"); err == nil {
+	if err := c.VerifyHostname("www.baidu.com"); err == nil {
 		t.Fatalf("verify www.google.com succeeded with InsecureSkipVerify=true")
 	}
 	if err := c.VerifyHostname("www.yahoo.com"); err == nil {
@@ -361,7 +361,7 @@ func TestVerifyHostnameResumed(t *testing.T) {
 		ClientSessionCache: NewLRUClientSessionCache(32),
 	}
 	for i := 0; i < 2; i++ {
-		c, err := Dial("tcp", "www.google.com:https", config)
+		c, err := Dial("tcp", "www.baidu.com:https", config)
 		if err != nil {
 			t.Fatalf("Dial #%d: %v", i, err)
 		}
@@ -372,7 +372,7 @@ func TestVerifyHostnameResumed(t *testing.T) {
 		if cs.VerifiedChains == nil {
 			t.Fatalf("Dial #%d: cs.VerifiedChains == nil", i)
 		}
-		if err := c.VerifyHostname("www.google.com"); err != nil {
+		if err := c.VerifyHostname("www.baidu.com"); err != nil {
 			t.Fatalf("verify www.google.com #%d: %v", i, err)
 		}
 		c.Close()
