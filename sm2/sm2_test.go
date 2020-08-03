@@ -1,106 +1,19 @@
-// Copyright 2011 The Go Authors. All rights reserved.
+// Copyright 2020 cetc-30. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// Package sm2 implements china crypto standards.
 package sm2
 
 import (
 	"bytes"
-	"crypto/elliptic"
 	"crypto/rand"
-	"encoding/gob"
 	"encoding/hex"
-	"fmt"
 	"github.com/Hyperledger-TWGC/cryptogm/sm3"
-	"io"
 	"math/big"
-	"reflect"
 	"testing"
 )
 
-type Assert struct{}
 
-func (a *Assert) Equal(t *testing.T, expect, actual interface{}) {
-	if reflect.TypeOf(expect) != reflect.TypeOf(actual) {
-		t.Error("assert failed not equal", expect, actual)
-		return
-	}
-	var buf1 bytes.Buffer
-	enc1 := gob.NewEncoder(&buf1)
-	enc1.Encode(expect)
-	var buf2 bytes.Buffer
-	enc2 := gob.NewEncoder(&buf2)
-	enc2.Encode(expect)
-	if bytes.Equal(buf1.Bytes(), buf2.Bytes()) {
-		t.Log("true")
-	} else {
-		t.Error("assert failed not equal", expect, actual)
-	}
-}
-func (a *Assert) True(t *testing.T, value bool) {
-	if value == true {
-		t.Log("true")
-	} else {
-		t.Error("assert failed %i is false", value)
-	}
-}
-
-var assert Assert
-
-func TestSignVerify(t *testing.T) {
-	msg := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
-	priv, err := GenerateKey(rand.Reader)
-	if err != nil {
-		panic("GenerateKey failed")
-	}
-
-	hfunc := sm3.New()
-	hfunc.Write(msg)
-	hash := hfunc.Sum(nil)
-
-	r, s, err := Sign(rand.Reader, priv, hash)
-	if err != nil {
-		panic(err)
-	}
-
-	ret := Verify(&priv.PublicKey, hash, r, s)
-	fmt.Println(ret)
-}
-
-func TestBase(t *testing.T) {
-	msg := []byte{1, 2, 3, 4}
-	priv, err := GenerateKey(rand.Reader)
-	if err != nil {
-		panic("GenerateKey failed")
-	}
-	//fmt.Printf("D:%s\n", priv.D.Text(16))
-	//fmt.Printf("X:%s\n", priv.X.Text(16))
-	//fmt.Printf("Y:%s\n", priv.Y.Text(16))
-	//fmt.Printf("p:%s\n", priv.Curve.Params().P.Text(16))
-	//fmt.Printf("n:%s\n", priv.Curve.Params().N.Text(16))
-	//fmt.Printf("b:%s\n", priv.Curve.Params().B.Text(16))
-	//fmt.Printf("gx:%s\n", priv.Curve.Params().Gx.Text(16))
-	//fmt.Printf("gy:%s\n", priv.Curve.Params().Gy.Text(16))
-
-	hfunc := sm3.New()
-	hfunc.Write(msg)
-	hash := hfunc.Sum(nil)
-	fmt.Printf("hash:%02X\n", hash)
-
-	r, s, err := Sign(rand.Reader, priv, hash)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("R:%s\n", r.Text(16))
-	fmt.Printf("S:%s\n", s.Text(16))
-
-	ret := Verify(&priv.PublicKey, hash, r, s)
-	fmt.Println(ret)
-}
-
-func TestKeyGeneration(t *testing.T) {
+func TestKeyGen(t *testing.T) {
 	priv, err := GenerateKey(rand.Reader)
 	if err != nil {
 		t.Errorf("error: %s", err)
@@ -108,93 +21,202 @@ func TestKeyGeneration(t *testing.T) {
 	}
 
 	if !priv.PublicKey.Curve.IsOnCurve(priv.PublicKey.X, priv.PublicKey.Y) {
-		t.Errorf("public key invalid: %s", err)
+		t.Errorf("public key is invalid: %s", err)
+		return
+	}
+}
+
+func TestSignAndVer(t *testing.T) {
+	msg := []byte("sm2 message111")
+	priv, err := GenerateKey(rand.Reader)
+	if err != nil {
+		panic("GenerateKey failed")
+	}
+
+	//hfunc := sm3.New()
+	//hfunc.Write(msg)
+	//hash := hfunc.Sum(nil)
+	hash := sm3.SumSM3(msg)
+
+	r, s, err := Sign(rand.Reader, priv, hash[:])
+
+	if err != nil {
+		panic(err)
+	}
+
+	if !Verify(&priv.PublicKey, hash[:], r, s) {
+		t.Error("signature is invalid!")
+		return
+	}
+}
+
+func TestSignAndVerWithDigest(t *testing.T) {
+	msg := []byte("sm2 message")
+	priv, err := GenerateKey(rand.Reader)
+	if err != nil {
+		t.Errorf("GenerateKey failed:%s",err)
+		return
+	}
+
+	var m = make([]byte, 32+len(msg))
+	copy(m, getZ(&priv.PublicKey))
+	copy(m[32:], msg)
+	digest := sm3.SumSM3(m)
+	r,s,err :=SignWithDigest(rand.Reader,priv,digest[:])
+	if err != nil {
+		t.Errorf("sign with digest failed:%s",err)
+		return
+	}
+
+	if !VerifyWithDigest(&priv.PublicKey,digest[:],r,s) {
+		t.Error("sig is invalid!")
+		return
+	}
+}
+
+func TestSignAndVerWithAsn1(t *testing.T) {
+	msg := []byte("sm2 message")
+	priv, err := GenerateKey(rand.Reader)
+	if err != nil {
+		t.Errorf("GenerateKey failed:%s",err)
+		return
+	}
+
+	sig,err :=priv.Sign(rand.Reader,msg)
+	if err != nil {
+		t.Errorf("sm2 sign failed:%s",err)
+		return
+	}
+
+	if !(&priv.PublicKey).Verify(msg,sig) {
+		t.Error("sig is invalid!")
+		return
 	}
 }
 
 func BenchmarkSign(b *testing.B) {
-	b.ResetTimer()
-	origin := []byte("testing")
-	hashed := sm3.SumSM3(origin)
+	hashed := []byte("testing")
 	priv, _ := GenerateKey(rand.Reader)
-	b.ReportAllocs()
-	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
-		_, _, _ = Sign(rand.Reader, priv, hashed[:])
+		_, _, _ = Sign(rand.Reader, priv, hashed)
 	}
 }
 
-func TestSignAndVerify(t *testing.T) {
+func BenchmarkVerify(b *testing.B) {
 	priv, _ := GenerateKey(rand.Reader)
 
-	origin := []byte("testintestintestintestintestintestinggggggtesting")
+	origin := []byte("testing")
 	hash := sm3.New()
 	hash.Write(origin)
 	hashed := hash.Sum(nil)
-	r, s, err := Sign(rand.Reader, priv, hashed)
-	if err != nil {
-		t.Errorf(" error signing: %s", err)
-		return
-	}
 
-	if !Verify(&priv.PublicKey, hashed, r, s) {
-		t.Errorf(" Verify failed")
-	}
+	sig,_ := priv.Sign(rand.Reader,hashed)
 
-	//hashed[0] ^= 0xff
-	hashed[0] = 0x53
-	for i := 0; i < len(hashed); i++ {
-		hashed[i] = byte(i)
-	}
-	if Verify(&priv.PublicKey, hashed, r, s) {
-		t.Errorf("Verify always works!")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		(&priv.PublicKey).Verify(hashed,sig)
 	}
 }
 
-func TestKDF(t *testing.T) {
-	x2, err := hex.DecodeString("64D20D27D0632957F8028C1E024F6B02EDF23102A566C932AE8BD613A8E865FE")
-	if err != nil {
-		t.Fatalf("%s", err.Error())
-	}
-	y2, err := hex.DecodeString("58D225ECA784AE300A81A2D48281A828E1CEDF11C4219099840265375077BF78")
-	if err != nil {
-		t.Fatalf("%s", err.Error())
-	}
-	expect, err := hex.DecodeString("006E30DAE231B071DFAD8AA379E90264491603")
-	klen := 152
-	actual := keyDerivation(append(x2, y2...), klen)
-	assert.Equal(t, expect, actual)
-
-}
-
-func TestCryptoToolCompare(t *testing.T) {
-	generateRandK = func(rand io.Reader, c elliptic.Curve) (k *big.Int) {
-		k, _ = new(big.Int).SetString("88E0271D16363C00D6456E151C095BAD4B75968E708234A9762146711D327FF3", 16)
-		return
-	}
-	priv := &PrivateKey{}
-	priv.PublicKey.Curve = P256Sm2()
-	priv.D, _ = new(big.Int).SetString("88E0271D16363C00D6456E151C095BAD4B75968E708234A9762146711D327FF3", 16)
-	priv.PublicKey.X, priv.PublicKey.Y = priv.PublicKey.ScalarBaseMult(priv.D.Bytes())
-
-	msg, _ := hex.DecodeString("88E0271D16363C00D6456E151C095BAD4B75968E708234A9762146711D327FF3")
-	Encrypt(rand.Reader, &priv.PublicKey, msg)
-}
-
-func TestEnc(t *testing.T) {
+func BenchmarkSignWithDigest(b *testing.B) {
 	priv, _ := GenerateKey(rand.Reader)
-	var msg = "asdfasdf"
 
-	enc, err := Encrypt(rand.Reader, &priv.PublicKey, []byte(msg))
-	if err != nil {
-		t.Fatalf("encrypt failed : %s", err.Error())
+	origin := []byte("testing")
+	hash := sm3.New()
+	hash.Write(origin)
+	hashed := hash.Sum(nil)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_,_,_ = SignWithDigest(rand.Reader,priv,hashed)
 	}
-	dec, err := Decrypt(enc, priv)
+}
+
+func BenchmarkVerifyWithDigest(b *testing.B) {
+	priv, _ := GenerateKey(rand.Reader)
+
+	origin := []byte("testing")
+	hash := sm3.New()
+	hash.Write(origin)
+	hashed := hash.Sum(nil)
+
+	r,s,_ := SignWithDigest(rand.Reader,priv,hashed)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		VerifyWithDigest(&priv.PublicKey,hashed,r,s)
+	}
+}
+
+func BenchmarkSignWithASN1(b *testing.B) {
+	priv, _ := GenerateKey(rand.Reader)
+
+	msg := []byte("message")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = priv.Sign(rand.Reader, msg)
+	}
+}
+
+func BenchmarkVerifyWithASN1(b *testing.B) {
+	priv, _ := GenerateKey(rand.Reader)
+
+	msg := []byte("message")
+
+	sig,_ := priv.Sign(rand.Reader,msg)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		(&priv.PublicKey).Verify(msg,sig)
+	}
+}
+func TestEncAndDec(t *testing.T) {
+	msg := []byte("sm2 encryption standard")
+
+	sk, _ := GenerateKey(rand.Reader)
+	pk := sk.PublicKey
+
+	//test encryption
+	cipher, err := Encrypt(rand.Reader, &pk, msg)
 	if err != nil {
-		t.Fatalf("dec failed : %s", err.Error())
+		t.Errorf("enc err:%s", err)
+		return
 	}
 
-	if !bytes.Equal([]byte(msg), dec) {
-		t.Error("enc-dec failed")
+	//test decryption
+	plain, err := Decrypt(cipher, sk)
+	if err != nil {
+		t.Errorf("dec err:%s", err)
+		return
+	}
+
+	if !bytes.Equal(msg, plain) {
+		t.Error("sm2 encryption is invalid")
+		return
+	}
+}
+
+func TestDecrypt(t *testing.T) {
+	c, _ := hex.DecodeString("04c03f6661e748ca80880af89237981a6ec80155971d41a0f128e7edef0ba332daf4d804d0d0df33f" +
+		"90928a8bce36d41bbd89313978ec706775a7045f58866715e511257c5b91b5f30f8cfcf55cf4b6228dbd91288e5a36a63a4b37e0a" +
+		"dc7c758d95f6c6cabc1e1f6db87715948452070d915d02f58b8abec4e1972ae431274dfcd5e9d955db04f2eb5f48d9db15df968cf" +
+		"ea53cfff8c00063ff204e99207b734c170230")
+	msg, _ := hex.DecodeString("f4de77e8488e0076893b438d9d053d870abf3deeb55cd53e58e763f411c8a60b95e8e8d205c533fc9e3d5016fb7d4a1c0ae1197703edda64d69b4d0532be23c3e3239e")
+
+	sk, _ := new(big.Int).SetString("14616ccf33a996453b4c7e8b03027af00d84a0fd89ceff38effac1595c68433a", 16)
+
+	pkx, pky := P256().ScalarBaseMult(sk.Bytes())
+
+	priv := PrivateKey{PublicKey{P256(), pkx, pky,nil}, sk,nil}
+
+	plain, err := Decrypt(c, &priv)
+	if err != nil {
+		t.Errorf("dec err:%s", err)
+		return
+	}
+
+	if !bytes.Equal(msg, plain) {
+		t.Error("decryption is invalid")
+		return
 	}
 }
