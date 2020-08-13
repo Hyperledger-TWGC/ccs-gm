@@ -6,4 +6,7 @@ go:
 install:
   - go mod vendor
 script:
-  - go test ./...
+  - go test -v ./sm2/
+  - go test -v ./sm3/
+  - go test -v ./sm4/
+  - go test -v ./internal/subtle/

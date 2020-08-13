@@ -1,0 +1,20 @@
+pool:
+   vmImage: 'ubuntu-18.04'
+
+strategy:
+  matrix:
+    LTS:
+      goVersion: '1.13'
+    latest:
+      goVersion: '1.14'
+
+steps:
+  - checkout: self
+  - task: GoTool@0
+    inputs:
+      version: $(goVersion)
+  - script: go mod vendor
+    displayName: import vendor
+  - script: go test -v ./sm2/
+  - script: go test -v ./sm3/
+  - script: go test -v ./sm4/
