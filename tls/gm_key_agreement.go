@@ -67,7 +67,8 @@ type ecdheKeyAgreementGM struct {
 	x, y *big.Int
 }
 
-func (ka *ecdheKeyAgreementGM) generateServerKeyExchange(config *Config, cert *Certificate, clientHello *clientHelloMsg, hello *serverHelloMsg) (*serverKeyExchangeMsg, error) {
+func (ka *ecdheKeyAgreementGM) generateServerKeyExchange(config *Config, signCert, cipherCert *Certificate,
+	clientHello *clientHelloMsg, hello *serverHelloMsg) (*serverKeyExchangeMsg, error) {
 	panic("")
 //	preferredCurves := config.curvePreferences()
 //
@@ -222,7 +223,7 @@ func (ka *ecdheKeyAgreementGM) processServerKeyExchange(config *Config, clientHe
 	}
 
 	//according to GMT0024, we don't care about
-	curve := sm2.P256Sm2()
+	curve := sm2.P256()
 	ka.x, ka.y = elliptic.Unmarshal(curve, publicKey) // Unmarshal also checks whether the given point is on the curve
 	if ka.x == nil {
 		return errServerKeyExchange
@@ -308,12 +309,13 @@ type eccKeyAgreementGM struct {
 	encipherCert *x509.Certificate
 }
 
-func (ka *eccKeyAgreementGM) generateServerKeyExchange(config *Config, cert *Certificate, clientHello *clientHelloMsg, hello *serverHelloMsg) (*serverKeyExchangeMsg, error) {
+func (ka *eccKeyAgreementGM) generateServerKeyExchange(config *Config, signCert, cipherCert *Certificate,
+	clientHello *clientHelloMsg, hello *serverHelloMsg) (*serverKeyExchangeMsg, error) {
 	// mod by syl only one cert
 	//digest := ka.hashForServerKeyExchange(clientHello.random, hello.random, cert.Certificate[1])
-	digest := ka.hashForServerKeyExchange(clientHello.random, hello.random, cert.Certificate[0])
+	digest := ka.hashForServerKeyExchange(clientHello.random, hello.random, cipherCert.Certificate[0])
 
-	priv,ok := cert.PrivateKey.(crypto.Signer)
+	priv,ok := signCert.PrivateKey.(crypto.Signer)
 	if !ok {
 		return nil, errors.New("tls: certificate private key does not implement crypto.Signer")
 	}

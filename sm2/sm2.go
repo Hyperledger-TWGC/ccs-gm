@@ -7,6 +7,7 @@ package sm2
 
 import (
 	"crypto"
+	"crypto/elliptic"
 	"errors"
 	"io"
 	"math/big"
@@ -15,7 +16,7 @@ import (
 )
 
 type PublicKey struct {
-	Curve
+	elliptic.Curve
 	X, Y *big.Int
 	PreComputed *[37][64*8]uint64        //precomputation
 }
@@ -45,7 +46,7 @@ func (priv *PrivateKey) Public() crypto.PublicKey {
 
 var one = new(big.Int).SetInt64(1)
 
-func randFieldElement(c Curve, rand io.Reader) (k *big.Int, err error) {
+func randFieldElement(c elliptic.Curve, rand io.Reader) (k *big.Int, err error) {
 	params := c.Params()
 	b := make([]byte, params.BitSize/8+8)
 	_, err = io.ReadFull(rand, b)
@@ -81,7 +82,7 @@ func GenerateKey(rand io.Reader) (*PrivateKey, error) {
 
 var errZeroParam = errors.New("zero parameter")
 
-func _generateRandK(rand io.Reader, c Curve) (k *big.Int) {
+func _generateRandK(rand io.Reader, c elliptic.Curve) (k *big.Int) {
 	params := c.Params()
 	b := make([]byte, params.BitSize/8+8)
 	_, err := io.ReadFull(rand, b)

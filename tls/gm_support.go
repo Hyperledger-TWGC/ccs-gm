@@ -82,6 +82,8 @@ var certCAs []*x509.Certificate
 
 var initonce sync.Once
 func getCAs() []*x509.Certificate {
+	// mod by syl remove pre insert ca certs
+	return nil
 	initonce.Do(func(){
 		for _,pemca := range pemCAs  {
 			block,_ := pem.Decode([]byte(pemca.pem))

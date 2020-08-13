@@ -5,6 +5,7 @@
 package sm2
 
 import (
+	"crypto"
 	"crypto/rand"
 	"encoding/asn1"
 	"io"
@@ -24,7 +25,7 @@ type sm2Signature struct {
 	R, S *big.Int
 }
 
-func (priv *PrivateKey) Sign(rand io.Reader, msg []byte) ([]byte, error) {
+func (priv *PrivateKey) Sign(rand io.Reader, msg []byte, opt crypto.SignerOpts) ([]byte, error) {
 	r, s, err := Sign(rand, priv, msg)
 	if err != nil {
 		return nil, err

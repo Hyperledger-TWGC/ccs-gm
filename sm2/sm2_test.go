@@ -82,7 +82,7 @@ func TestSignAndVerWithAsn1(t *testing.T) {
 		return
 	}
 
-	sig,err :=priv.Sign(rand.Reader,msg)
+	sig,err :=priv.Sign(rand.Reader,msg,nil)
 	if err != nil {
 		t.Errorf("sm2 sign failed:%s",err)
 		return
@@ -111,7 +111,7 @@ func BenchmarkVerify(b *testing.B) {
 	hash.Write(origin)
 	hashed := hash.Sum(nil)
 
-	sig,_ := priv.Sign(rand.Reader,hashed)
+	sig,_ := priv.Sign(rand.Reader,hashed,nil)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -154,7 +154,7 @@ func BenchmarkSignWithASN1(b *testing.B) {
 	msg := []byte("message")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = priv.Sign(rand.Reader, msg)
+		_, _ = priv.Sign(rand.Reader, msg,nil)
 	}
 }
 
@@ -163,7 +163,7 @@ func BenchmarkVerifyWithASN1(b *testing.B) {
 
 	msg := []byte("message")
 
-	sig,_ := priv.Sign(rand.Reader,msg)
+	sig,_ := priv.Sign(rand.Reader,msg,nil)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

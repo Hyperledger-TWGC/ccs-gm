@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build sigle_cert
+// +build !sigle_cert
 
 package tls
 
@@ -30,7 +30,7 @@ type serverHandshakeStateGM struct {
 	finishedHash          finishedHash
 	masterSecret          []byte
 	certsFromClient       [][]byte
-	cert                  *Certificate
+	cert                  []Certificate
 	cachedClientHelloInfo *ClientHelloInfo
 }
 
@@ -143,27 +143,6 @@ func (hs *serverHandshakeStateGM) readClientHello() (isResume bool, err error) {
 
 	hs.hello = new(serverHelloMsg)
 
-	//supportedCurve := false
-//	preferredCurves := c.config.curvePreferences()
-//Curves:
-//	for _, curve := range hs.clientHello.supportedCurves {
-//		for _, supported := range preferredCurves {
-//			if supported == curve {
-//				supportedCurve = true
-//				break Curves
-//			}
-//		}
-//	}
-//
-//	supportedPointFormat := false
-//	for _, pointFormat := range hs.clientHello.supportedPoints {
-//		if pointFormat == pointFormatUncompressed {
-//			supportedPointFormat = true
-//			break
-//		}
-//	}
-//	hs.ellipticOk = supportedCurve && supportedPointFormat
-
 	foundCompression := false
 	// We only support null compression, so check that the client offered it.
 	for _, compression := range hs.clientHello.compressionMethods {
@@ -213,23 +192,18 @@ func (hs *serverHandshakeStateGM) readClientHello() (isResume bool, err error) {
 		}
 	}
 
-	hs.cert, err = c.config.getCertificate(hs.clientHelloInfo())
-	if err != nil {
-		c.sendAlert(alertInternalError)
-		return false, err
-	}
+	// just for test
+	c.config.getCertificate(hs.clientHelloInfo())
+	hs.cert = c.config.Certificates
+
 	// GMT0024
-	// mod by syl just for test change two certs into one cert
-	//if len(hs.cert.Certificate) < 2 {
-	//	c.sendAlert(alertInternalError)
-	//	return false, fmt.Errorf("tls: amount of server certificates must be greater than 2, which will sign and encipher respectively")
-	//}
-	if len(hs.cert.Certificate) < 1 {
+	if len(hs.cert) < 2 {
 		c.sendAlert(alertInternalError)
-		return false, fmt.Errorf("tls: amount of server certificates must be greater than 0")
+		return false, fmt.Errorf("tls: amount of server certificates must be greater than 2, which will sign and encipher respectively")
 	}
+
 	if hs.clientHello.scts {
-		hs.hello.scts = hs.cert.SignedCertificateTimestamps
+		hs.hello.scts = hs.cert[0].SignedCertificateTimestamps
 	}
 
 	if hs.checkForResumption() {
@@ -349,7 +323,7 @@ func (hs *serverHandshakeStateGM) doResumeHandshake() error {
 func (hs *serverHandshakeStateGM) doFullHandshake() error {
 	c := hs.c
 
-	if hs.clientHello.ocspStapling && len(hs.cert.OCSPStaple) > 0 {
+	if hs.clientHello.ocspStapling && len(hs.cert[0].OCSPStaple) > 0 {
 		hs.hello.ocspStapling = true
 	}
 
@@ -369,7 +343,10 @@ func (hs *serverHandshakeStateGM) doFullHandshake() error {
 	}
 
 	certMsg := new(certificateMsg)
-	certMsg.certificates = hs.cert.Certificate
+	//certMsg.certificates = hs.cert.Certificate
+	for i:=0; i<len(hs.cert); i++ {
+		certMsg.certificates = append(certMsg.certificates, hs.cert[i].Certificate...)
+	}
 	hs.finishedHash.Write(certMsg.marshal())
 	if _, err := c.writeRecord(recordTypeHandshake, certMsg.marshal()); err != nil {
 		return err
@@ -378,7 +355,7 @@ func (hs *serverHandshakeStateGM) doFullHandshake() error {
 	if hs.hello.ocspStapling {
 		certStatus := new(certificateStatusMsg)
 		certStatus.statusType = statusTypeOCSP
-		certStatus.response = hs.cert.OCSPStaple
+		certStatus.response = hs.cert[0].OCSPStaple
 		hs.finishedHash.Write(certStatus.marshal())
 		if _, err := c.writeRecord(recordTypeHandshake, certStatus.marshal()); err != nil {
 			return err
@@ -386,7 +363,7 @@ func (hs *serverHandshakeStateGM) doFullHandshake() error {
 	}
 
 	keyAgreement := hs.suite.ka(c.vers)
-	skx, err := keyAgreement.generateServerKeyExchange(c.config, hs.cert, hs.clientHello, hs.hello)
+	skx, err := keyAgreement.generateServerKeyExchange(c.config, &hs.cert[0], &hs.cert[1],  hs.clientHello, hs.hello)
 	if err != nil {
 		c.sendAlert(alertHandshakeFailure)
 		return err
@@ -480,7 +457,7 @@ func (hs *serverHandshakeStateGM) doFullHandshake() error {
 	}
 	hs.finishedHash.Write(ckx.marshal())
 
-	preMasterSecret, err := keyAgreement.processClientKeyExchange(c.config, hs.cert, ckx, c.vers)
+	preMasterSecret, err := keyAgreement.processClientKeyExchange(c.config, &hs.cert[1], ckx, c.vers)
 	if err != nil {
 		c.sendAlert(alertHandshakeFailure)
 		return err

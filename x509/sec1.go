@@ -99,7 +99,7 @@ func parseECPrivateKey(namedCurveOID *asn1.ObjectIdentifier, der []byte) (key in
 	}
 
 	switch curve {
-	case sm2.P256Sm2():
+	case sm2.P256():
 		k := new(big.Int).SetBytes(privKey.PrivateKey)
 		curveOrder := curve.Params().N
 		if k.Cmp(curveOrder) >= 0 {
