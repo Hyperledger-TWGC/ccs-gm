@@ -13,8 +13,8 @@ import (
 	"crypto/subtle"
 	"errors"
 	"fmt"
-	"github.com/Hyperledger-TWGC/cryptogm/sm2"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"io"
 	"sync/atomic"
 )
@@ -344,7 +344,7 @@ func (hs *serverHandshakeStateGM) doFullHandshake() error {
 
 	certMsg := new(certificateMsg)
 	//certMsg.certificates = hs.cert.Certificate
-	for i:=0; i<len(hs.cert); i++ {
+	for i := 0; i < len(hs.cert); i++ {
 		certMsg.certificates = append(certMsg.certificates, hs.cert[i].Certificate...)
 	}
 	hs.finishedHash.Write(certMsg.marshal())
@@ -363,7 +363,7 @@ func (hs *serverHandshakeStateGM) doFullHandshake() error {
 	}
 
 	keyAgreement := hs.suite.ka(c.vers)
-	skx, err := keyAgreement.generateServerKeyExchange(c.config, &hs.cert[0], &hs.cert[1],  hs.clientHello, hs.hello)
+	skx, err := keyAgreement.generateServerKeyExchange(c.config, &hs.cert[0], &hs.cert[1], hs.clientHello, hs.hello)
 	if err != nil {
 		c.sendAlert(alertHandshakeFailure)
 		return err

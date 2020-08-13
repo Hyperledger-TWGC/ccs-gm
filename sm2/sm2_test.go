@@ -7,11 +7,10 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/Hyperledger-TWGC/cryptogm/sm3"
+	"github.com/Hyperledger-TWGC/ccs-gm/sm3"
 	"math/big"
 	"testing"
 )
-
 
 func TestKeyGen(t *testing.T) {
 	priv, err := GenerateKey(rand.Reader)
@@ -54,7 +53,7 @@ func TestSignAndVerWithDigest(t *testing.T) {
 	msg := []byte("sm2 message")
 	priv, err := GenerateKey(rand.Reader)
 	if err != nil {
-		t.Errorf("GenerateKey failed:%s",err)
+		t.Errorf("GenerateKey failed:%s", err)
 		return
 	}
 
@@ -62,13 +61,13 @@ func TestSignAndVerWithDigest(t *testing.T) {
 	copy(m, getZ(&priv.PublicKey))
 	copy(m[32:], msg)
 	digest := sm3.SumSM3(m)
-	r,s,err :=SignWithDigest(rand.Reader,priv,digest[:])
+	r, s, err := SignWithDigest(rand.Reader, priv, digest[:])
 	if err != nil {
-		t.Errorf("sign with digest failed:%s",err)
+		t.Errorf("sign with digest failed:%s", err)
 		return
 	}
 
-	if !VerifyWithDigest(&priv.PublicKey,digest[:],r,s) {
+	if !VerifyWithDigest(&priv.PublicKey, digest[:], r, s) {
 		t.Error("sig is invalid!")
 		return
 	}
@@ -78,17 +77,17 @@ func TestSignAndVerWithAsn1(t *testing.T) {
 	msg := []byte("sm2 message")
 	priv, err := GenerateKey(rand.Reader)
 	if err != nil {
-		t.Errorf("GenerateKey failed:%s",err)
+		t.Errorf("GenerateKey failed:%s", err)
 		return
 	}
 
-	sig,err :=priv.Sign(rand.Reader,msg,nil)
+	sig, err := priv.Sign(rand.Reader, msg, nil)
 	if err != nil {
-		t.Errorf("sm2 sign failed:%s",err)
+		t.Errorf("sm2 sign failed:%s", err)
 		return
 	}
 
-	if !(&priv.PublicKey).Verify(msg,sig) {
+	if !(&priv.PublicKey).Verify(msg, sig) {
 		t.Error("sig is invalid!")
 		return
 	}
@@ -111,11 +110,11 @@ func BenchmarkVerify(b *testing.B) {
 	hash.Write(origin)
 	hashed := hash.Sum(nil)
 
-	sig,_ := priv.Sign(rand.Reader,hashed,nil)
+	sig, _ := priv.Sign(rand.Reader, hashed, nil)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		(&priv.PublicKey).Verify(hashed,sig)
+		(&priv.PublicKey).Verify(hashed, sig)
 	}
 }
 
@@ -128,7 +127,7 @@ func BenchmarkSignWithDigest(b *testing.B) {
 	hashed := hash.Sum(nil)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_,_,_ = SignWithDigest(rand.Reader,priv,hashed)
+		_, _, _ = SignWithDigest(rand.Reader, priv, hashed)
 	}
 }
 
@@ -140,11 +139,11 @@ func BenchmarkVerifyWithDigest(b *testing.B) {
 	hash.Write(origin)
 	hashed := hash.Sum(nil)
 
-	r,s,_ := SignWithDigest(rand.Reader,priv,hashed)
+	r, s, _ := SignWithDigest(rand.Reader, priv, hashed)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		VerifyWithDigest(&priv.PublicKey,hashed,r,s)
+		VerifyWithDigest(&priv.PublicKey, hashed, r, s)
 	}
 }
 
@@ -154,7 +153,7 @@ func BenchmarkSignWithASN1(b *testing.B) {
 	msg := []byte("message")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = priv.Sign(rand.Reader, msg,nil)
+		_, _ = priv.Sign(rand.Reader, msg, nil)
 	}
 }
 
@@ -163,11 +162,11 @@ func BenchmarkVerifyWithASN1(b *testing.B) {
 
 	msg := []byte("message")
 
-	sig,_ := priv.Sign(rand.Reader,msg,nil)
+	sig, _ := priv.Sign(rand.Reader, msg, nil)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		(&priv.PublicKey).Verify(msg,sig)
+		(&priv.PublicKey).Verify(msg, sig)
 	}
 }
 func TestEncAndDec(t *testing.T) {
@@ -207,7 +206,7 @@ func TestDecrypt(t *testing.T) {
 
 	pkx, pky := P256().ScalarBaseMult(sk.Bytes())
 
-	priv := PrivateKey{PublicKey{P256(), pkx, pky,nil}, sk,nil}
+	priv := PrivateKey{PublicKey{P256(), pkx, pky, nil}, sk, nil}
 
 	plain, err := Decrypt(c, &priv)
 	if err != nil {

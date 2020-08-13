@@ -6,10 +6,10 @@ package tls
 
 import (
 	"bytes"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"io"
 	"io/ioutil"
 	"math"

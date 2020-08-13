@@ -12,7 +12,7 @@ import (
 	"crypto/subtle"
 	"errors"
 	"fmt"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"io"
 	"net"
 	"strconv"
@@ -103,10 +103,10 @@ func (c *Conn) clientHandshake() error {
 
 	var hello *clientHelloMsg
 	var err error
-	if c.config.GMSupport != nil{
+	if c.config.GMSupport != nil {
 		c.vers = VersionGMSSL
 		hello, err = makeClientHelloGM(c.config)
-	}else{
+	} else {
 		hello, err = makeClientHello(c.config)
 	}
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *Conn) clientHandshake() error {
 		candidateSession, ok := sessionCache.Get(cacheKey)
 		if ok {
 			// Check that the ciphersuite/version used for the
-		// previous session are still valid.
+			// previous session are still valid.
 			cipherSuiteOk := false
 			for _, id := range hello.cipherSuites {
 				if id == candidateSession.cipherSuite {
@@ -166,8 +166,7 @@ func (c *Conn) clientHandshake() error {
 		}
 	}
 
-
-	if c.config.GMSupport != nil{
+	if c.config.GMSupport != nil {
 		hs := &clientHandshakeStateGM{
 			c:       c,
 			hello:   hello,
@@ -181,7 +180,7 @@ func (c *Conn) clientHandshake() error {
 		if sessionCache != nil && hs.session != nil && session != hs.session {
 			sessionCache.Put(cacheKey, hs.session)
 		}
-	}else{
+	} else {
 		hs := &clientHandshakeState{
 			c:       c,
 			hello:   hello,

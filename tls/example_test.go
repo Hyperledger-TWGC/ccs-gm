@@ -5,8 +5,8 @@
 package tls_test
 
 import (
-	"github.com/Hyperledger-TWGC/cryptogm/tls"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/tls"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"log"
 )
 
@@ -67,7 +67,6 @@ yuGnBXj8ytqU0CwIPX4WecigUCAkVDNx
 	}
 	conn.Close()
 }
-
 
 func ExampleLoadX509KeyPair() {
 	cert, err := tls.LoadX509KeyPair("testdata/example-cert.pem", "testdata/example-key.pem")

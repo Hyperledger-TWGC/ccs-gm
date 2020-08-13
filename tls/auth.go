@@ -12,7 +12,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Hyperledger-TWGC/cryptogm/sm2"
+	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
 )
 
 // pickSignatureAlgorithm selects a signature algorithm that is compatible with
@@ -109,7 +109,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 		if err := rsa.VerifyPSS(pubKey, hashFunc, digest, sig, signOpts); err != nil {
 			return err
 		}
-		case signatureSM2:
+	case signatureSM2:
 		pubKey, ok := pubkey.(*sm2.PublicKey)
 		if !ok {
 			return errors.New("tls: SM2 signing requires a SM2 public key")

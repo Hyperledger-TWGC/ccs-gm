@@ -12,7 +12,7 @@ import (
 	"crypto/rc4"
 	"crypto/sha1"
 	"crypto/sha256"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"hash"
 
 	"golang.org/x/crypto/chacha20poly1305"

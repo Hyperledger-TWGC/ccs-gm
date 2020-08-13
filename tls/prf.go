@@ -13,7 +13,7 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
-	"github.com/Hyperledger-TWGC/cryptogm/sm3"
+	"github.com/Hyperledger-TWGC/ccs-gm/sm3"
 	"hash"
 )
 
@@ -244,7 +244,7 @@ func (h *finishedHash) Write(msg []byte) (n int, err error) {
 }
 
 func (h finishedHash) Sum() []byte {
-	if h.version >= VersionTLS12 || h.version == VersionGMSSL{
+	if h.version >= VersionTLS12 || h.version == VersionGMSSL {
 		return h.client.Sum(nil)
 	}
 

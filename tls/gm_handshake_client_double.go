@@ -14,8 +14,8 @@ import (
 	"crypto/subtle"
 	"errors"
 	"fmt"
-	"github.com/Hyperledger-TWGC/cryptogm/sm2"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"io"
 	"strconv"
 	"sync/atomic"
@@ -37,9 +37,9 @@ func makeClientHelloGM(config *Config) (*clientHelloMsg, error) {
 	}
 
 	hello := &clientHelloMsg{
-		vers:                         config.GMSupport.GetVersion(),
-		compressionMethods:           []uint8{compressionNone},
-		random:                       make([]byte, 32),
+		vers:               config.GMSupport.GetVersion(),
+		compressionMethods: []uint8{compressionNone},
+		random:             make([]byte, 32),
 	}
 	possibleCipherSuites := getCipherSuites(config)
 	hello.cipherSuites = make([]uint16, 0, len(possibleCipherSuites))
@@ -84,7 +84,7 @@ func (hs *clientHandshakeStateGM) handshake() error {
 		return unexpectedMessageError(hs.serverHello, msg)
 	}
 
-	if hs.serverHello.vers != VersionGMSSL{
+	if hs.serverHello.vers != VersionGMSSL {
 		hs.c.sendAlert(alertProtocolVersion)
 		return fmt.Errorf("tls: server selected unsupported protocol version %x, while expecting %x", hs.serverHello.vers, VersionGMSSL)
 	}
@@ -183,7 +183,7 @@ func (hs *clientHandshakeStateGM) doFullHandshake() error {
 
 	// mod by syl only one cert
 	// Thanks to dual certificates mechanism, length of certificates in GMT0024 must great than 2
-	if len(certMsg.certificates) < 2{
+	if len(certMsg.certificates) < 2 {
 		c.sendAlert(alertInsufficientSecurity)
 		return fmt.Errorf("tls: length of certificates in GMT0024 must great than 2")
 	}
@@ -201,7 +201,7 @@ func (hs *clientHandshakeStateGM) doFullHandshake() error {
 				return errors.New("tls: failed to parse certificate from server: " + err.Error())
 			}
 
-			if _, ok = cert.PublicKey.(*sm2.PublicKey); !ok{
+			if _, ok = cert.PublicKey.(*sm2.PublicKey); !ok {
 				c.sendAlert(alertUnsupportedCertificate)
 				return fmt.Errorf("tls: pubkey type of cert is error, expect sm2.publicKey")
 			}
@@ -210,12 +210,12 @@ func (hs *clientHandshakeStateGM) doFullHandshake() error {
 			//check key usage
 			switch i {
 			case 0:
-				if cert.KeyUsage == 0 || (cert.KeyUsage & (x509.KeyUsageDigitalSignature | cert.KeyUsage&x509.KeyUsageContentCommitment)) == 0{
+				if cert.KeyUsage == 0 || (cert.KeyUsage&(x509.KeyUsageDigitalSignature|cert.KeyUsage&x509.KeyUsageContentCommitment)) == 0 {
 					c.sendAlert(alertInsufficientSecurity)
 					return fmt.Errorf("tls: the keyusage of cert[0] does not exist or is not for KeyUsageDigitalSignature/KeyUsageContentCommitment, value:%d", cert.KeyUsage)
 				}
 			case 1:
-				if cert.KeyUsage == 0 || (cert.KeyUsage & (x509.KeyUsageDataEncipherment | x509.KeyUsageKeyEncipherment | x509.KeyUsageKeyAgreement))==0{
+				if cert.KeyUsage == 0 || (cert.KeyUsage&(x509.KeyUsageDataEncipherment|x509.KeyUsageKeyEncipherment|x509.KeyUsageKeyAgreement)) == 0 {
 					c.sendAlert(alertInsufficientSecurity)
 					return fmt.Errorf("tls: the keyusage of cert[1] does not exist or is not for KeyUsageDataEncipherment/KeyUsageKeyEncipherment/KeyUsageKeyAgreement, value:%d", cert.KeyUsage)
 				}
@@ -235,7 +235,7 @@ func (hs *clientHandshakeStateGM) doFullHandshake() error {
 				opts.Roots = x509.NewCertPool()
 			}
 
-			for _,rootca := range getCAs() {
+			for _, rootca := range getCAs() {
 				opts.Roots.AddCert(rootca)
 			}
 			for i, cert := range certs {
@@ -287,7 +287,7 @@ func (hs *clientHandshakeStateGM) doFullHandshake() error {
 	}
 
 	keyAgreement := hs.suite.ka(c.vers)
-	if ka,ok := keyAgreement.(*eccKeyAgreementGM); ok{
+	if ka, ok := keyAgreement.(*eccKeyAgreementGM); ok {
 		ka.encipherCert = c.peerCertificates[1]
 	}
 
@@ -313,7 +313,7 @@ func (hs *clientHandshakeStateGM) doFullHandshake() error {
 		certRequested = true
 		hs.finishedHash.Write(certReq.marshal())
 
-		if chainToSend, err = hs.getCertificate(certReq); err != nil || chainToSend.Certificate == nil{
+		if chainToSend, err = hs.getCertificate(certReq); err != nil || chainToSend.Certificate == nil {
 			c.sendAlert(alertInternalError)
 			return err
 		}
@@ -655,4 +655,3 @@ findCert:
 	// No acceptable certificate found. Don't send a certificate.
 	return new(Certificate), nil
 }
-

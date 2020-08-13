@@ -18,7 +18,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 )
 
 // A Conn represents a secured connection.
@@ -1276,9 +1276,9 @@ func (c *Conn) Handshake() error {
 	if c.isClient {
 		c.handshakeErr = c.clientHandshake()
 	} else {
-		if c.config.GMSupport == nil{
+		if c.config.GMSupport == nil {
 			c.handshakeErr = c.serverHandshake()
-		}else{
+		} else {
 			c.handshakeErr = c.serverHandshakeGM()
 		}
 	}

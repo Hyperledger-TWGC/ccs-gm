@@ -10,7 +10,7 @@ import (
 	"encoding/asn1"
 	"errors"
 	"fmt"
-	"github.com/Hyperledger-TWGC/cryptogm/sm2"
+	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
 	"math/big"
 )
 

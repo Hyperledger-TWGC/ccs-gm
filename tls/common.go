@@ -11,7 +11,7 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
-	"github.com/Hyperledger-TWGC/cryptogm/x509"
+	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"io"
 	"math/big"
 	"net"
@@ -241,7 +241,7 @@ const (
 
 	// Legacy signature and hash algorithms for TLS 1.2.
 	ECDSAWithSHA1 SignatureScheme = 0x0203
-	SM2WITHSM3 SignatureScheme = 0x0204
+	SM2WITHSM3    SignatureScheme = 0x0204
 )
 
 // ClientHelloInfo contains information from a ClientHello message in order to

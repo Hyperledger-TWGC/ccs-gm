@@ -1,5 +1,3 @@
-github.com/cetcxinlian/cryptogm v0.0.0-20200806165024-f3ca35db27b0 h1:I31h6FrhkFK6Yt5aitWEcEeRzQ5Ue3llgC3c+9KqUas=
-github.com/cetcxinlian/cryptogm v0.0.0-20200806165024-f3ca35db27b0/go.mod h1:hjsTKNb4tfO2Ark9xcDuZnlrVB+nT2sFrs8ePjBUAnA=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 h1:DZhuSZLsGlFL4CmhA8BcRA0mnthyA/nZ00AqCUo7vHg=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
