@@ -5,6 +5,8 @@ package sm2
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/Hyperledger-TWGC/ccs-gm/sm3"
@@ -102,6 +104,15 @@ func BenchmarkSign(b *testing.B) {
 	}
 }
 
+func BenchmarkEcdsaSign(b *testing.B) {
+	hashed := []byte("testing")
+	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+
+	for i := 0; i < b.N; i++ {
+		_, _, _ = ecdsa.Sign(rand.Reader, priv, hashed)
+	}
+}
+
 func BenchmarkVerify(b *testing.B) {
 	priv, _ := GenerateKey(rand.Reader)
 
@@ -115,6 +126,16 @@ func BenchmarkVerify(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		(&priv.PublicKey).Verify(hashed, sig)
+	}
+}
+
+func BenchmarkEcdsaVerify(b *testing.B) {
+	hashed := []byte("testing")
+	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	r, s, _ := ecdsa.Sign(rand.Reader, priv, hashed)
+
+	for i := 0; i < b.N; i++ {
+		ecdsa.Verify(&priv.PublicKey, hashed, r, s)
 	}
 }
 
