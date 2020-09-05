@@ -1,5 +1,5 @@
 // Copyright 2020 cetc-30. All rights reserved.
-// Use of this source code is governed by a BSD-style
+// SPDX-License-Identifier: Apache-2.0
 // license that can be found in the LICENSE file.
 
 // Package sm2 implements china crypto standards.
@@ -8,7 +8,6 @@ package sm2
 import (
 	"crypto"
 	"crypto/elliptic"
-	"errors"
 	"io"
 	"math/big"
 
@@ -79,8 +78,6 @@ func GenerateKey(rand io.Reader) (*PrivateKey, error) {
 	}
 	return priv, nil
 }
-
-var errZeroParam = errors.New("zero parameter")
 
 func _generateRandK(rand io.Reader, c elliptic.Curve) (k *big.Int) {
 	params := c.Params()

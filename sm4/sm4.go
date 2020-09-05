@@ -1,5 +1,5 @@
 // Copyright 2020 cetc-30. All rights reserved.
-// Use of this source code is governed by a BSD-style
+// SPDX-License-Identifier: Apache-2.0
 // license that can be found in the LICENSE file.
 
 // Package sm4 implements the sm4 algorithms

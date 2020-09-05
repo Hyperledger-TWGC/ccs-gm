@@ -1,5 +1,5 @@
 // Copyright 2020 cetc-30. All rights reserved.
-// Use of this source code is governed by a BSD-style
+// SPDX-License-Identifier: Apache-2.0
 // license that can be found in the LICENSE file.
 package sm2
 
@@ -17,13 +17,11 @@ import (
 func TestKeyGen(t *testing.T) {
 	priv, err := GenerateKey(rand.Reader)
 	if err != nil {
-		t.Errorf("error: %s", err)
-		return
+		t.Fatalf("error: %s", err)
 	}
 
 	if !priv.PublicKey.Curve.IsOnCurve(priv.PublicKey.X, priv.PublicKey.Y) {
-		t.Errorf("public key is invalid: %s", err)
-		return
+		t.Fatalf("public key is invalid: %s", err)
 	}
 }
 
@@ -46,8 +44,7 @@ func TestSignAndVer(t *testing.T) {
 	}
 
 	if !Verify(&priv.PublicKey, hash[:], r, s) {
-		t.Error("signature is invalid!")
-		return
+		t.Fatalf("signature is invalid!")
 	}
 }
 
@@ -55,8 +52,7 @@ func TestSignAndVerWithDigest(t *testing.T) {
 	msg := []byte("sm2 message")
 	priv, err := GenerateKey(rand.Reader)
 	if err != nil {
-		t.Errorf("GenerateKey failed:%s", err)
-		return
+		t.Fatalf("GenerateKey failed:%s", err)
 	}
 
 	var m = make([]byte, 32+len(msg))
@@ -65,13 +61,11 @@ func TestSignAndVerWithDigest(t *testing.T) {
 	digest := sm3.SumSM3(m)
 	r, s, err := SignWithDigest(rand.Reader, priv, digest[:])
 	if err != nil {
-		t.Errorf("sign with digest failed:%s", err)
-		return
+		t.Fatalf("sign with digest failed:%s", err)
 	}
 
 	if !VerifyWithDigest(&priv.PublicKey, digest[:], r, s) {
-		t.Error("sig is invalid!")
-		return
+		t.Fatal("sig is invalid!")
 	}
 }
 
@@ -79,19 +73,16 @@ func TestSignAndVerWithAsn1(t *testing.T) {
 	msg := []byte("sm2 message")
 	priv, err := GenerateKey(rand.Reader)
 	if err != nil {
-		t.Errorf("GenerateKey failed:%s", err)
-		return
+		t.Fatalf("GenerateKey failed:%s", err)
 	}
 
 	sig, err := priv.Sign(rand.Reader, msg, nil)
 	if err != nil {
-		t.Errorf("sm2 sign failed:%s", err)
-		return
+		t.Fatalf("sm2 sign failed:%s", err)
 	}
 
 	if !(&priv.PublicKey).Verify(msg, sig) {
-		t.Error("sig is invalid!")
-		return
+		t.Fatalf("sig is invalid!")
 	}
 }
 
@@ -199,20 +190,17 @@ func TestEncAndDec(t *testing.T) {
 	//test encryption
 	cipher, err := Encrypt(rand.Reader, &pk, msg)
 	if err != nil {
-		t.Errorf("enc err:%s", err)
-		return
+		t.Fatalf("enc err:%s", err)
 	}
 
 	//test decryption
 	plain, err := Decrypt(cipher, sk)
 	if err != nil {
-		t.Errorf("dec err:%s", err)
-		return
+		t.Fatalf("dec err:%s", err)
 	}
 
 	if !bytes.Equal(msg, plain) {
-		t.Error("sm2 encryption is invalid")
-		return
+		t.Fatal("sm2 encryption is invalid")
 	}
 }
 
@@ -231,12 +219,10 @@ func TestDecrypt(t *testing.T) {
 
 	plain, err := Decrypt(c, &priv)
 	if err != nil {
-		t.Errorf("dec err:%s", err)
-		return
+		t.Fatalf("dec err:%s", err)
 	}
 
 	if !bytes.Equal(msg, plain) {
-		t.Error("decryption is invalid")
-		return
+		t.Fatal("decryption is invalid")
 	}
 }
