@@ -1,5 +1,15 @@
 ## 更新日志
 
+### master 更新（Sep 11, 2020）:
+- 新增导入导出接口  
+
+   | 接口名 | 接口功能 | 
+   | --- | --- |
+   | PrivateKeyToPEM | 将私钥转为pem字节流 |
+   | PEMtoPrivateKey 将pem字节流转成sm2私钥 | 
+   | PublicKeyToPEM | 将公钥转为pem字节流 |
+   | PEMtoPublicKey | 将pem字节流转为sm2公钥 |
+
 
 ### master 更新 （Aug 20, 2020）
 - 新增性能测试数据<br>
