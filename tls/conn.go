@@ -1288,6 +1288,7 @@ func (c *Conn) Handshake() error {
 		// If an error occurred during the hadshake try to flush the
 		// alert that might be left in the buffer.
 		c.flush()
+		fmt.Println("handshake error :", c.handshakeErr)
 	}
 
 	if c.handshakeErr == nil && !c.handshakeComplete() {
