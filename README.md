@@ -8,4 +8,27 @@ go语言国密密码库，实现了数据签名/验签、数据哈希、对称�
 ## License
 Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
 
+## Feature 功能支持列表
+
+|  SM2功能   | 支持范围  | 
+|  ----  | ----  |
+| Generate KeyPair  | 是 |
+| Sign  | 是 |
+| Verify | 是 |
+| PEM格式导出 | 私钥/公钥/证书|
+| PEM格式导入 | 私钥/公钥/证书 |
+| PEM文件加密 | RFC5958 |  
+
+|  SM4功能   | 支持范围  | 
+|  ----  | ----  |
+| Generate Key | 是 |
+| Encrypt, Decrypt | 是 |
+| PEM格式导出 |   |
+| PEM文件加密 | golang: `x509.EncryptPEMBlock` |
+| 分组模式 | ECB/CBC |
+
+
+|  SM3功能   | 支持范围  | 
+|  ----  | ----  |
+| 当前语言Hash接口兼容 | `是` |
 
