@@ -18,3 +18,4 @@ steps:
   - script: go test -v ./sm2/
   - script: go test -v ./sm3/
   - script: go test -v ./sm4/
+  - script: go test -v ./utils/
