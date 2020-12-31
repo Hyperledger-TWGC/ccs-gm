@@ -15,7 +15,13 @@ steps:
       version: $(goVersion)
   - script: go mod vendor
     displayName: import vendor
-  - script: go test -v ./sm2/
-  - script: go test -v ./sm3/
-  - script: go test -v ./sm4/
-  - script: go test -v ./utils/
+  # TODO: use go test -v ./... --bench=. -cover when 
+  - script: go test -v ./sm2/... --bench=. -cover
+  - script: go test -v ./sm3/... --bench=. -cover
+  - script: go test -v ./sm4/... --bench=. -cover
+  - script: go test -v ./utils/... --bench=. -cover
+  - script: go test -v ./internal/... --bench=. -cover
+  # TODO: this lib has error
+  #- script: go test -v ./x509/... --bench=. -cover
+  # TODO: this lib testing hang up
+  #- script: go test -v ./tls/... --bench=. -cover
