@@ -31,6 +31,8 @@ var buf = make([]byte, 8192)
 func benchmarkSizeEcb(b *testing.B, size int) {
 	b.SetBytes(int64(size))
 	key := []byte("1234567890abcdef")
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Sm4Ecb(key, buf[:size], ENC)
 	}
@@ -75,6 +77,7 @@ func BenchmarkSm4Cipher_Encrypt(b *testing.B) {
 	encMsg := make([]byte, 16)
 
 	b.SetBytes(int64(len(msg)))
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		c.Encrypt(encMsg, msg)
@@ -90,6 +93,7 @@ func BenchmarkSm4Cipher_Decrypt(b *testing.B) {
 	c.Encrypt(encMsg, msg)
 
 	b.SetBytes(int64(len(msg)))
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		c.Decrypt(plain, encMsg)
@@ -121,6 +125,8 @@ func TestSm4Cbc(t *testing.T) {
 func benchmarkSizeCbc(b *testing.B, size int) {
 	b.SetBytes(int64(size))
 	key := []byte("1234567890abcdef")
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Sm4Cbc(key, buf[:size], ENC)
 	}

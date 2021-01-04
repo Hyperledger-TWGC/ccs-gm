@@ -9,9 +9,10 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/Hyperledger-TWGC/ccs-gm/sm3"
 	"math/big"
 	"testing"
+
+	"github.com/Hyperledger-TWGC/ccs-gm/sm3"
 )
 
 func TestKeyGen(t *testing.T) {
@@ -89,7 +90,8 @@ func TestSignAndVerWithAsn1(t *testing.T) {
 func BenchmarkSign(b *testing.B) {
 	hashed := []byte("testing")
 	priv, _ := GenerateKey(rand.Reader)
-
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _, _ = Sign(rand.Reader, priv, hashed)
 	}
@@ -98,7 +100,8 @@ func BenchmarkSign(b *testing.B) {
 func BenchmarkEcdsaSign(b *testing.B) {
 	hashed := []byte("testing")
 	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _, _ = ecdsa.Sign(rand.Reader, priv, hashed)
 	}
@@ -113,7 +116,7 @@ func BenchmarkVerify(b *testing.B) {
 	hashed := hash.Sum(nil)
 
 	sig, _ := priv.Sign(rand.Reader, hashed, nil)
-
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		(&priv.PublicKey).Verify(hashed, sig)
@@ -124,7 +127,8 @@ func BenchmarkEcdsaVerify(b *testing.B) {
 	hashed := []byte("testing")
 	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	r, s, _ := ecdsa.Sign(rand.Reader, priv, hashed)
-
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ecdsa.Verify(&priv.PublicKey, hashed, r, s)
 	}
@@ -137,6 +141,7 @@ func BenchmarkSignWithDigest(b *testing.B) {
 	hash := sm3.New()
 	hash.Write(origin)
 	hashed := hash.Sum(nil)
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _, _ = SignWithDigest(rand.Reader, priv, hashed)
@@ -153,6 +158,7 @@ func BenchmarkVerifyWithDigest(b *testing.B) {
 
 	r, s, _ := SignWithDigest(rand.Reader, priv, hashed)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		VerifyWithDigest(&priv.PublicKey, hashed, r, s)
@@ -163,6 +169,7 @@ func BenchmarkSignWithASN1(b *testing.B) {
 	priv, _ := GenerateKey(rand.Reader)
 
 	msg := []byte("message")
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = priv.Sign(rand.Reader, msg, nil)
@@ -176,6 +183,7 @@ func BenchmarkVerifyWithASN1(b *testing.B) {
 
 	sig, _ := priv.Sign(rand.Reader, msg, nil)
 
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		(&priv.PublicKey).Verify(msg, sig)

@@ -55,6 +55,8 @@ var buf = make([]byte, 8192)
 func benchmarkSize(b *testing.B, size int) {
 	b.SetBytes(int64(size))
 	sum := make([]byte, bench.Size())
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		bench.Reset()
 		bench.Write(buf[:size])

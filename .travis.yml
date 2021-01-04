@@ -6,7 +6,8 @@ go:
 install:
   - go mod vendor
 script:
-  - go test -v ./sm2/
-  - go test -v ./sm3/
-  - go test -v ./sm4/
-  - go test -v ./internal/subtle/
+  - go test -v ./sm2/... --bench=. -cover
+  - go test -v ./sm3/... --bench=. -cover
+  - go test -v ./sm4/... --bench=. -cover
+  - go test -v ./utils/... --bench=. -cover
+  - go test -v ./internal/... --bench=. -cover
