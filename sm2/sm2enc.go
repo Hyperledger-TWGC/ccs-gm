@@ -56,9 +56,9 @@ func Encrypt(rand io.Reader, key *PublicKey, msg []byte) (cipher []byte, err err
 
 	c1 := pointToBytes(x, y)
 
-	//c = c1||c2||c3,len(c1)=65,len(c3)=32
-	cipher = append(c1, c2...)
-	cipher = append(cipher, c3...)
+	//c = c1||c3||c2,len(c1)=65,len(c3)=32
+	cipher = append(c1, c3...)
+	cipher = append(cipher, c2...)
 
 	return
 }
@@ -160,7 +160,7 @@ func Decrypt(c []byte, key *PrivateKey) ([]byte, error) {
 	}
 
 	// m` = c2 ^ t
-	c2 := c[65:(len(c) - 32)]
+	c2 := c[97:]
 	for i, v := range t {
 		t[i] = v ^ c2[i]
 	}
@@ -171,7 +171,7 @@ func Decrypt(c []byte, key *PrivateKey) ([]byte, error) {
 	copy(_u[32:], t)
 	copy(_u[32+len(t):], yBuf)
 	u := sm3.SumSM3(_u)
-	if !bytes.Equal(u[:], c[65+len(c2):]) {
+	if !bytes.Equal(u[:], c[65:97]) {
 		return nil, DecryptionErr
 	}
 
