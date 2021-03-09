@@ -21,6 +21,8 @@ steps:
   - script: go test -v ./sm4/... --bench=. -cover
   - script: go test -v ./utils/... --bench=. -cover
   - script: go test -v ./internal/... --bench=. -cover
+  - script: go test -v -tags=single_cert ./tls/testtls/tls-single-cert/tls-single-cert_test.go
+  - script: go test -v ./tls/testtls/tls-double-cert/tls-double-cert_test.go
   # TODO: this lib has error
   #- script: go test -v ./x509/... --bench=. -cover
   # TODO: this lib testing hang up
