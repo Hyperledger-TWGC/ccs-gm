@@ -8,8 +8,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"encoding/hex"
-	"math/big"
 	"testing"
 
 	"github.com/Hyperledger-TWGC/ccs-gm/sm3"
@@ -209,28 +207,5 @@ func TestEncAndDec(t *testing.T) {
 
 	if !bytes.Equal(msg, plain) {
 		t.Fatal("sm2 encryption is invalid")
-	}
-}
-
-func TestDecrypt(t *testing.T) {
-	c, _ := hex.DecodeString("04c03f6661e748ca80880af89237981a6ec80155971d41a0f128e7edef0ba332daf4d804d0d0df33f" +
-		"90928a8bce36d41bbd89313978ec706775a7045f58866715e511257c5b91b5f30f8cfcf55cf4b6228dbd91288e5a36a63a4b37e0a" +
-		"dc7c758d95f6c6cabc1e1f6db87715948452070d915d02f58b8abec4e1972ae431274dfcd5e9d955db04f2eb5f48d9db15df968cf" +
-		"ea53cfff8c00063ff204e99207b734c170230")
-	msg, _ := hex.DecodeString("f4de77e8488e0076893b438d9d053d870abf3deeb55cd53e58e763f411c8a60b95e8e8d205c533fc9e3d5016fb7d4a1c0ae1197703edda64d69b4d0532be23c3e3239e")
-
-	sk, _ := new(big.Int).SetString("14616ccf33a996453b4c7e8b03027af00d84a0fd89ceff38effac1595c68433a", 16)
-
-	pkx, pky := P256().ScalarBaseMult(sk.Bytes())
-
-	priv := PrivateKey{PublicKey{P256(), pkx, pky, nil}, sk, nil}
-
-	plain, err := Decrypt(c, &priv)
-	if err != nil {
-		t.Fatalf("dec err:%s", err)
-	}
-
-	if !bytes.Equal(msg, plain) {
-		t.Fatal("decryption is invalid")
 	}
 }
