@@ -1,3 +1,5 @@
+github.com/flyinox/crypto v0.0.0-20181115071019-41abcab37232 h1:3aYnOUiJD+sS/SDOmhbDC2Wix+nc85gVU7pdfDBQr+M=
+github.com/flyinox/crypto v0.0.0-20181115071019-41abcab37232/go.mod h1:dZ7YNVgi6Y8Vn/H6RgL3T9FT3Hx1iM5PEVQ65bpnAFI=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 h1:DZhuSZLsGlFL4CmhA8BcRA0mnthyA/nZ00AqCUo7vHg=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
