@@ -169,6 +169,7 @@ func Decrypt(c []byte, key *PrivateKey) ([]byte, error) {
 
 	// m` = c3 ^ t
 	c3 := c[97:]
+
 	for i, v := range t {
 		t[i] = v ^ c3[i]
 	}

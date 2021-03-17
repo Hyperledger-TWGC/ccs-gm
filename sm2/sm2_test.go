@@ -208,4 +208,28 @@ func TestEncAndDec(t *testing.T) {
 	if !bytes.Equal(msg, plain) {
 		t.Fatal("sm2 encryption is invalid")
 	}
+
+}
+
+func TestDecrypt(t *testing.T) {
+	c, _ := hex.DecodeString("04f7c1f276a21a34ebeed2ce1b76d7cb92ef81e69de229ea3254cc4bb7fec8b02224729a8722244b22" +
+		"78e72c5f61cb74c05c247532dfe36d508927cbd59f7dfd33f7343975dd04a425851f3d39a81793f3b0af9e37aa58b7c4e4ed05fa56" +
+		"b637b3d7c4ae8866f00f26c6060452903098cd1435cd46a239fbc9f8ba2e4a54ea205b72f85308928ce34c7938c5d7d571062ba30a" +
+		"31f1123693d9e16cb8e1b9d0516432a01a")
+	msg, _ := hex.DecodeString("f4de77e8488e0076893b438d9d053d870abf3deeb55cd53e58e763f411c8a60b95e8e8d205c533fc9e3d5016fb7d4a1c0ae1197703edda64d69b4d0532be23c3e3239e")
+
+	sk, _ := new(big.Int).SetString("14616ccf33a996453b4c7e8b03027af00d84a0fd89ceff38effac1595c68433a", 16)
+
+	pkx, pky := P256().ScalarBaseMult(sk.Bytes())
+
+	priv := PrivateKey{PublicKey{P256(), pkx, pky, nil}, sk, nil}
+
+	plain, err := Decrypt(c, &priv)
+	if err != nil {
+		t.Fatalf("dec err:%s", err)
+	}
+
+	if !bytes.Equal(msg, plain) {
+		t.Fatal("decryption is invalid")
+	}
 }
