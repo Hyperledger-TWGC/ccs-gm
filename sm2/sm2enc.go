@@ -7,6 +7,7 @@ package sm2
 import (
 	"bytes"
 	"crypto"
+	"encoding/asn1"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -18,6 +19,13 @@ import (
 
 var EncryptionErr = errors.New("sm2: encryption error")
 var DecryptionErr = errors.New("sm2: decryption error")
+
+type sm2Cipher struct {
+	XCoordinate *big.Int
+	YCoordinate *big.Int
+	HASH        []byte
+	CipherText  []byte
+}
 
 func (key *PrivateKey) Decrypt(rand io.Reader, msg []byte, opts crypto.DecrypterOpts) (plaintext []byte, err error) {
 	return Decrypt(msg, key)
@@ -212,4 +220,78 @@ func pointFromBytes(buf []byte) (x, y *big.Int) {
 	y = new(big.Int).SetBytes(buf[33:])
 
 	return
+}
+
+func EncryptAsn1(rand io.Reader, key *PublicKey, msg []byte) (cipher []byte,err error) {
+	x, y, c2, c3, err := doEncrypt(rand, key, msg)
+	if err != nil {
+		return nil, err
+	}
+
+	var C = sm2Cipher{x,y,c3,c2}
+
+	return asn1.Marshal(C)
+}
+
+func DecryptAsn1(priv *PrivateKey,cipher []byte) (plaintext []byte,err error) {
+	var C sm2Cipher
+
+	_, err = asn1.Unmarshal(cipher,&C)
+	if err != nil {
+		return nil,err
+	}
+
+	x1, y1 := C.XCoordinate,C.YCoordinate
+
+	//dB*C1
+	x2, y2 := priv.Curve.ScalarMult(x1, y1, priv.D.Bytes())
+
+	xBuf := x2.Bytes()
+	yBuf := y2.Bytes()
+
+	xPadding := make([]byte, 32)
+	yPadding := make([]byte, 32)
+	if n := len(xBuf); n < 32 {
+		xBuf = append(xPadding[:32-n], xBuf...)
+	}
+
+	if n := len(yBuf); n < 32 {
+		yBuf = append(yPadding[:32-n], yBuf...)
+	}
+
+	//z=x2||y2
+	Z := make([]byte, 64)
+	copy(Z, xBuf)
+	copy(Z[32:], yBuf)
+
+	t := keyDerivation(Z, len(C.CipherText)*8)
+	if t == nil {
+		return nil, DecryptionErr
+	}
+	for i, v := range t {
+		if v != 0 {
+			break
+		}
+		if i == len(t)-1 {
+			return nil, DecryptionErr
+		}
+	}
+
+	// m` = c2 ^ t
+	c2 := C.CipherText
+	for i, v := range t {
+		t[i] = v ^ c2[i]
+	}
+
+	//validate
+	_u := make([]byte, 64+len(t))
+	copy(_u, xBuf)
+	copy(_u[32:], t)
+	copy(_u[32+len(t):], yBuf)
+	u := sm3.SumSM3(_u)
+	if !bytes.Equal(u[:], C.HASH) {
+		return nil, DecryptionErr
+	}
+
+	return t, nil
 }
