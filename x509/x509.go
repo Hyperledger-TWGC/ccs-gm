@@ -2037,7 +2037,12 @@ func (c *Certificate) CreateCRL(rand io.Reader, priv interface{}, revokedCerts [
 		return
 	}
 
-	h := hashFunc.New()
+	var h hash.Hash
+	if hashFunc == 255 {
+		h = sm3.New()
+	} else {
+		h = hashFunc.New()
+	}
 	h.Write(tbsCertListContents)
 	digest := h.Sum(nil)
 

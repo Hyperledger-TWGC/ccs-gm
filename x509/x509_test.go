@@ -26,6 +26,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParsePKCS1PrivateKey(t *testing.T) {
@@ -826,6 +829,45 @@ func TestCRLCreation(t *testing.T) {
 	if !reflect.DeepEqual(parsedCRL.TBSCertList.RevokedCertificates, expectedCerts) {
 		t.Errorf("RevokedCertificates mismatch: got %v; want %v.",
 			parsedCRL.TBSCertList.RevokedCertificates, expectedCerts)
+	}
+}
+
+func TestSm2CRLCreation(t *testing.T) {
+	loc := time.FixedZone("Oz/Atlantis", int((2 * time.Hour).Seconds()))
+	now := time.Unix(1000, 0).In(loc)
+	nowUTC := now.UTC()
+	expiry := time.Unix(10000, 0)
+	revokedCerts := []pkix.RevokedCertificate{
+		{
+			SerialNumber:   big.NewInt(1),
+			RevocationTime: nowUTC,
+		},
+		{
+			SerialNumber: big.NewInt(42),
+			// RevocationTime should be converted to UTC before marshaling.
+			RevocationTime: now,
+		},
+	}
+	priv, _ := sm2.GenerateKey(rand.Reader)
+	template := &Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			CommonName: "Σ Acme Co",
+		},
+		NotBefore: time.Unix(1000, 0),
+		NotAfter:  time.Unix(100000, 0),
+
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+	}
+	certBytes, err := CreateCertificate(rand.Reader, template, template, &priv.PublicKey, priv)
+	require.Nil(t, err)
+	cert, err := ParseCertificate(certBytes)
+	require.Nil(t, err)
+
+	// Panic at this if the sm3 hashFunc not checked
+	if _, err := cert.CreateCRL(rand.Reader, priv, revokedCerts, now, expiry); err != nil {
+		t.Errorf("error creating CRL: %s", err)
 	}
 }
 
