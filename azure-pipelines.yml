@@ -1,18 +1,11 @@
 pool:
-   vmImage: 'ubuntu-18.04'
-
-strategy:
-  matrix:
-    LTS:
-      goVersion: '1.13'
-    latest:
-      goVersion: '1.14'
+   vmImage: 'ubuntu-latest'
 
 steps:
   - checkout: self
   - task: GoTool@0
     inputs:
-      version: $(goVersion)
+      version: '1.17'
   - script: go mod vendor
     displayName: import vendor
   # TODO: use go test -v ./... --bench=. -cover when 
