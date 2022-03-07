@@ -1,5 +1,5 @@
 module github.com/Hyperledger-TWGC/ccs-gm
 
-go 1.14
+go 1.16
 
-require golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
+require golang.org/x/crypto v0.0.0-20220214200702-86341886e292
