@@ -20,7 +20,7 @@ var (
 )
 
 func initP256() {
-	println("arch:arm64")
+	
 	// See FIPS 186-3, section D.2.3
 	p256.CurveParams = &elliptic.CurveParams{Name: "P-256"}
 	p256.P, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16)
