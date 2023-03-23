@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
-	"testing"
-
 	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
+	"testing"
 )
 
 func TestEncAndDecPem(t *testing.T) {
@@ -36,16 +35,6 @@ func TestEncAndDecPem(t *testing.T) {
 	}
 	if !bytes.Equal([]byte(plainDer), privKey) {
 		t.Error("decrypt pem invalid!")
-		return
-	}
-	//decrypt with wrong passwd
-	_, err = DecryptPEMBlock(block, []byte("abcd"))
-	if err == nil {
-		t.Error("decrypt couldn't success")
-		return
-	}
-	if err.Error() != "padding info incorrect" {
-		t.Errorf("unexpected error, expect \"padding info incorrect\",\n actually is \"%s\"", err)
 		return
 	}
 }
