@@ -43,7 +43,6 @@ const (
  * reference to RFC5959 and RFC2898
  */
 
-
 var (
 	oidPBES1  = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 3}  // pbeWithMD5AndDES-CBC(PBES1)
 	oidPBES2  = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 13} // id-PBES2(PBES2)
@@ -233,14 +232,17 @@ func DecryptPEMBlock(b *pem.Block, password []byte) ([]byte, error) {
 
 	//un-padding
 	dataLen := len(encryptedKey)
-	padLen := int(encryptedKey[dataLen - 1])
+	padLen := int(encryptedKey[dataLen-1])
+	//check the padLen
+	if dataLen <= padLen {
+		return nil, errors.New("padding info incorrect")
+	}
 	for i := 0; i < padLen; i++ {
-		if int(encryptedKey[dataLen - padLen + i]) != padLen {
+		if int(encryptedKey[dataLen-padLen+i]) != padLen {
 			return nil, errors.New("padding info incorrect")
 		}
 	}
-
-	return encryptedKey[:dataLen - padLen], nil
+	return encryptedKey[:dataLen-padLen], nil
 }
 
 // EncryptPEMBlock returns a PEM block of the specified type holding the
