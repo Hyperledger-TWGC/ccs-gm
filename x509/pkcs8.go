@@ -5,10 +5,13 @@
 package x509
 
 import (
+	sysx509 "crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
 	"fmt"
+
+	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
 )
 
 // pkcs8 reflects an ASN.1, PKCS#8 PrivateKey. See
@@ -51,5 +54,36 @@ func ParsePKCS8PrivateKey(der []byte) (key interface{}, err error) {
 
 	default:
 		return nil, fmt.Errorf("x509: PKCS#8 wrapping contained private key with unknown algorithm: %v", privKey.Algo.Algorithm)
+	}
+}
+
+// MarshalPKCS8PrivateKey converts a private key to PKCS #8, ASN.1 DER form.
+//
+// The following key types are currently supported: *rsa.PrivateKey, *ecdsa.PrivateKey
+// *sm2.PrivateKey and ed25519.PrivateKey. Unsupported key types result in an error.
+//
+// This kind of key is commonly encoded in PEM blocks of type "PRIVATE KEY".
+func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
+	switch key.(type) {
+	case *sm2.PrivateKey:
+		asn1Bytes, err := MarshalECPrivateKey(key)
+		if err != nil {
+			return nil, err
+		}
+
+		var pkcs8Key pkcs8
+		pkcs8Key.Version = 0
+		var AlgorithmIdentifier pkix.AlgorithmIdentifier
+		AlgorithmIdentifier.Algorithm = oidPublicKeyECDSA
+		AlgorithmIdentifier.Parameters.Class = 0
+		AlgorithmIdentifier.Parameters.Tag = 6
+		AlgorithmIdentifier.Parameters.IsCompound = false
+		AlgorithmIdentifier.Parameters.FullBytes = []byte{6, 8, 42, 129, 28, 207, 85, 1, 130, 45}
+		pkcs8Key.Algo = AlgorithmIdentifier
+		pkcs8Key.PrivateKey = asn1Bytes
+		return asn1.Marshal(pkcs8Key)
+
+	default:
+		return sysx509.MarshalPKCS8PrivateKey(key)
 	}
 }
